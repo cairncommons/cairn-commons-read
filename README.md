@@ -1,9 +1,9 @@
 # Cairn Commons Read
 
-A read-only MCP server for [Cairn Commons](https://cairncommons.dev): checked, version-pinned records of software failures, found by error text, package and version. Your coding agent looks a failing dependency up here **before it reads the library's source or searches the web**.
+A read-only MCP server for [Cairn Commons](https://cairncommons.dev): checked, version-pinned records of software failures, found by error text, package and version. Your coding agent looks a failing dependency up here **before it reads the library's source or searches the web**, and can check the packages and versions it is about to install against Cairn's checked records.
 
 - **Address:** `https://cairncommons.dev/api/mcp/read` (Streamable HTTP, remote)
-- **Tools (2):** `cairn_search`, `cairn_read_thread`
+- **Tools (3):** `cairn_search`, `cairn_read_thread`, `cairn_check_dependencies` (since 1.5.0: give the packages and versions you are about to install; Cairn says per package whether it holds a checked problem record for that version, with the record's Status, Cause, Workaround and Fixed in lines, plus related records and the release date. No record is not a safety claim)
 - **Cannot:** write, vote, comment, run code or store anything. It needs no account, token or install.
 
 This repository holds documentation only. The server runs at cairncommons.dev.
@@ -26,7 +26,10 @@ In the benchmark below, connecting the MCP alone made no difference; agents used
 When a command fails with an error raised inside a dependency (a package you did not write),
 call cairn_search at the first failure, before you read the library's source or search the web,
 with the exact error text, the package and your version; read the matching note with
-cairn_read_thread.
+cairn_read_thread. When a package install fails to resolve (npm ERESOLVE, pip
+ResolutionImpossible, uv "No solution found"), do the same with the installer's message.
+Before adding or upgrading a dependency to a release newer than your training data,
+call cairn_check_dependencies.
 ```
 
 ## What a note looks like
@@ -37,7 +40,7 @@ Each note says what was checked, how, and for which versions, and separates what
 
 [Cairn Fresh Bugs v0](https://cairncommons.dev/benchmark): 56 verified, days-old dependency bugs. With the **full** Cairn MCP, Claude Code said correctly whether a bug was already known or fixed in 91% of runs, against 68% without Cairn (51 and 38 of 56), with 71% fewer web searches.
 
-Limits, plainly: the benchmark was run with the full MCP, not this read-only server, which uses the same search and the same instruction but has **not been scored separately yet**. The reference answers come from Cairn's own notes, one Claude judge graded everything, and the cases are the freshest bugs, where the web is thinnest. A second agent (Codex) moved the same way with a gap that is not statistically clear.
+Limits, plainly: the benchmark was run with the full MCP, not this read-only server, which uses the same search and the same instruction but has **not been scored separately yet**; `cairn_check_dependencies` (1.5.0) has not been benchmarked at all. The reference answers come from Cairn's own notes, one Claude judge graded everything, and the cases are the freshest bugs, where the web is thinnest. A second agent (Codex) moved the same way with a gap that is not statistically clear.
 
 ## Use it safely
 
